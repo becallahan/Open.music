@@ -4,298 +4,173 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Open.Music Composer</title>
-  <style>
-    :root{
-      --paper:#f8fbff;
-      --ink:#19172f;
-      --muted:#64617f;
-      --panel:#eef5ff;
-      --panel-2:#f3f0ff;
-      --accent:#6d5dfc;
-      --accent-2:#74b9ff;
-      --purple:#3f2b96;
-      --danger:#ff6b8a;
-      --success:#30d158;
-      --white:#ffffff;
-      --line:#d9def3;
-      --shadow:0 18px 42px rgba(63,43,150,.16);
-      --soft-shadow:0 8px 20px rgba(63,43,150,.12);
-      --radius:22px;
-    }
+  <style>/* Open.Music index14 visual theme transplant
+   Paste this near the bottom of your newest Open.Music <style> block,
+   or save as open-music-index14-theme.css and link it in <head>.
+*/
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-rounded, "Arial Rounded MT Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color:var(--ink);
-      background:
-        radial-gradient(circle at 16% 0%, rgba(116,185,255,.32), transparent 30%),
-        radial-gradient(circle at 100% 8%, rgba(109,93,252,.24), transparent 32%),
-        linear-gradient(180deg, #f7fbff 0%, #edf3ff 52%, #f6f2ff 100%);
-      min-height:100vh;
-    }
+:root{
+  --paper:#f7f4ea;
+  --ink:#171717;
+  --muted:#555;
+  --panel:#e7e1cf;
+  --panel-2:#f0ead8;
+  --red:#b74435;
+  --mustard:#d5a326;
+  --green:#2f8a55;
+  --white:#fffdf7;
+  --shadow:0 10px 25px rgba(0,0,0,.14);
+  --radius:18px;
+}
 
-    header{
-      padding:18px 18px 10px;
-      display:flex;
-      justify-content:center;
-    }
+body{
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(213,163,38,.18), transparent 28%),
+    radial-gradient(circle at 100% 8%, rgba(183,68,53,.14), transparent 30%),
+    linear-gradient(180deg, #f3efe1 0%, #ece5d1 100%);
+  font-family: ui-rounded, "Arial Rounded MT Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
 
-    .app{
-      width:min(1220px, 96vw);
-      display:grid;
-      grid-template-columns: 260px 1fr;
-      gap:16px;
-    }
+.sidebar,
+.control-panel,
+.main-card,
+.score-card,
+.composer-card{
+  background:rgba(255,253,247,.9);
+  border:3px solid var(--ink);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
 
-    .sidebar, .main-card{
-      background:rgba(255,255,255,.86);
-      border:1px solid rgba(63,43,150,.18);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(18px);
-    }
+.toolbar,
+.topbar,
+.transport-bar{
+  background:var(--panel);
+  border-bottom:3px solid var(--ink);
+}
 
-    .sidebar{
-      padding:16px;
-      align-self:start;
-      position:sticky;
-      top:12px;
-    }
+button,
+.tool-button,
+.rhythm-button,
+.transport-button{
+  border:3px solid var(--ink);
+  border-radius:12px;
+  background:var(--white);
+  color:var(--ink);
+  padding:10px 8px;
+  cursor:pointer;
+  font-weight:900;
+  box-shadow:3px 3px 0 var(--ink);
+  transition:transform .05s ease, box-shadow .05s ease, background .12s ease;
+}
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-bottom:14px;
-    }
+button:hover,
+.tool-button:hover,
+.rhythm-button:hover,
+.transport-button:hover{
+  background:#fff4c5;
+}
 
-    .badge{
-      width:48px;height:48px;
-      display:grid;place-items:center;
-      border:1px solid rgba(255,255,255,.7);
-      border-radius:16px;
-      background:linear-gradient(135deg, var(--purple), var(--accent-2));
-      color:white;
-      font-weight:900;
-      font-size:22px;
-      box-shadow:var(--soft-shadow);
-    }
+button:active,
+.tool-button:active,
+.rhythm-button:active,
+.transport-button:active{
+  transform:translate(3px,3px);
+  box-shadow:0 0 0 var(--ink);
+}
 
-    h1{
-      margin:0;
-      font-size:26px;
-      letter-spacing:-.5px;
-      line-height:1;
-    }
+button.active,
+.tool-button.active,
+.rhythm-button.active{
+  background:var(--mustard);
+  color:var(--ink);
+}
 
-    .subtitle{
-      margin:2px 0 0;
-      color:var(--muted);
-      font-size:12px;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:.09em;
-    }
+button.danger,
+.danger,
+.erase-button,
+.clear-button{
+  background:#ffd9d4;
+}
 
-    .music-nerd{
-      background:linear-gradient(135deg, #25145f, #142f6f);
-      color:#eef5ff;
-      border:1px solid rgba(255,255,255,.2);
-      border-radius:18px;
-      padding:12px;
-      margin:12px 0 16px;
-      font-family:"Courier New", monospace;
-      font-size:12px;
-      line-height:1.35;
-      position:relative;
-    }
+button.good,
+.good,
+.play-button{
+  background:#ddf4de;
+}
 
-    .nerd-face{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      font-weight:900;
-      color:#9fd3ff;
-    }
+.badge,
+.logo-badge{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border:3px solid var(--ink);
+  border-radius:14px;
+  background:var(--mustard);
+  font-weight:900;
+  font-size:22px;
+  box-shadow:4px 4px 0 var(--ink);
+}
 
-    .section-title{
-      margin:14px 0 8px;
-      font-size:13px;
-      color:var(--muted);
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
+.music-nerd,
+.helper-bubble,
+.assistant-bubble{
+  background:#101010;
+  color:#e8ffed;
+  border:3px solid var(--ink);
+  border-radius:14px;
+  padding:12px;
+  margin:12px 0 16px;
+  font-family:"Courier New", monospace;
+  font-size:12px;
+  line-height:1.35;
+}
 
-    .btn-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
-    }
+.nerd-face{
+  font-weight:900;
+  color:#9dffbd;
+}
 
-    button, select, input{
-      font:inherit;
-    }
+.canvas-wrap,
+.score-wrap,
+.staff-wrap{
+  background:
+    linear-gradient(rgba(0,0,0,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,.025) 1px, transparent 1px),
+    var(--paper);
+  background-size:24px 24px;
+}
 
-    button{
-      border:1px solid rgba(63,43,150,.2);
-      border-radius:14px;
-      background:var(--white);
-      color:var(--ink);
-      padding:11px 10px;
-      cursor:pointer;
-      font-weight:900;
-      box-shadow:var(--soft-shadow);
-      transition:transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
-    }
+svg,
+.score-svg,
+#score{
+  background:#fffdf7;
+  border:3px solid var(--ink);
+  border-radius:16px;
+  box-shadow: inset 0 0 0 6px rgba(213,163,38,.08);
+}
 
-    button:hover{ background:#f3f7ff; border-color:rgba(109,93,252,.38); transform:translateY(-1px); }
-    button:active{ transform:translateY(1px); box-shadow:0 4px 10px rgba(63,43,150,.12); }
-    button:focus-visible, select:focus-visible, input:focus-visible{
-      outline:3px solid rgba(116,185,255,.55);
-      outline-offset:3px;
-    }
-    button.active{
-      background:linear-gradient(135deg, var(--accent), var(--accent-2));
-      border-color:transparent;
-      color:white;
-    }
-    button.danger{ background:#fff0f5; color:#9d1736; }
-    button.good{ background:#edfff5; color:#14592b; }
-    button.good.active{ color:white; }
-    button.wide{ grid-column:1 / -1; }
+.staff-line{ stroke:var(--ink); stroke-width:2; }
+.bar-line{ stroke:var(--ink); stroke-width:2.2; }
+.measure-guide{ stroke:rgba(0,0,0,.12); stroke-width:1; stroke-dasharray:4 5; }
+.notehead{ fill:var(--ink); stroke:var(--ink); stroke-width:1.8; }
+.notehead.open{ fill:#fffdf7; }
+.stem{ stroke:var(--ink); stroke-width:2.6; stroke-linecap:round; }
+.beam{ stroke:var(--ink); stroke-width:8; stroke-linecap:butt; }
+.playhead{ stroke:var(--red); stroke-width:4; opacity:.9; }
+.clef{ font-family:"Times New Roman", Georgia, serif; font-size:88px; fill:var(--ink); }
+.timesig{ font-family:Georgia, serif; font-size:34px; font-weight:900; fill:var(--ink); }
 
-    .control-row{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      margin:8px 0;
-    }
-
-    .control-row label{
-      font-size:13px;
-      font-weight:900;
-      width:72px;
-    }
-
-    input[type=range]{ width:100%; accent-color:var(--accent); }
-    select{
-      width:100%;
-      padding:11px 12px;
-      border:1px solid rgba(63,43,150,.2);
-      border-radius:14px;
-      background:var(--white);
-      color:var(--ink);
-      font-weight:900;
-      box-shadow:var(--soft-shadow);
-    }
-
-    .main-card{
-      overflow:hidden;
-    }
-
-    .toolbar{
-      background:var(--panel);
-      padding:12px;
-      border-bottom:1px solid rgba(63,43,150,.16);
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-    }
-
-    .toolbar-left, .toolbar-right{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .tempo-pill{
-      border:1px solid rgba(63,43,150,.2);
-      background:var(--white);
-      border-radius:999px;
-      padding:8px 12px;
-      font-weight:900;
-      box-shadow:var(--soft-shadow);
-    }
-
-    .canvas-wrap{
-      background:
-        linear-gradient(rgba(63,43,150,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(63,43,150,.035) 1px, transparent 1px),
-        var(--paper);
-      background-size:24px 24px;
-      padding:18px;
-      overflow:auto;
-    }
-
-    svg{
-      display:block;
-      min-width:980px;
-      width:100%;
-      height:460px;
-      background:#ffffff;
-      border:1px solid rgba(63,43,150,.18);
-      border-radius:18px;
-      box-shadow: inset 0 0 0 6px rgba(116,185,255,.08), var(--soft-shadow);
-    }
-
-    .staff-line{ stroke:var(--ink); stroke-width:2; }
-    .bar-line{ stroke:var(--ink); stroke-width:2.2; }
-    .measure-guide{ stroke:rgba(109,93,252,.18); stroke-width:1; stroke-dasharray:4 5; }
-    .slot-hit{ fill:transparent; cursor:pointer; }
-    .slot-hit:hover{ fill:rgba(116,185,255,.18); }
-    .notehead{ fill:var(--ink); stroke:var(--ink); stroke-width:1.8; }
-    .notehead.open{ fill:#fffdf7; }
-    .stem{ stroke:var(--ink); stroke-width:2.6; stroke-linecap:round; }
-    .beam{ stroke:var(--ink); stroke-width:8; stroke-linecap:butt; }
-    .flag{ stroke:var(--ink); stroke-width:2.4; fill:none; }
-    .rest{ fill:var(--ink); font-weight:900; font-family:Georgia, serif; }
-    .selected-outline{ fill:none; stroke:var(--accent); stroke-width:3; stroke-dasharray:4 3; pointer-events:none; }
-    .playhead{ stroke:var(--accent); stroke-width:4; pointer-events:none; opacity:.9; }
-    .pitch-label{ fill:rgba(0,0,0,.38); font-size:13px; font-weight:900; pointer-events:none; }
-    .beat-label{ fill:rgba(0,0,0,.5); font-size:12px; font-weight:900; pointer-events:none; }
-    .title-text{ font-size:22px; font-weight:900; fill:var(--ink); }
-    .small-text{ font-size:12px; font-weight:900; fill:var(--muted); }
-    .clef{ font-family: "Times New Roman", Georgia, serif; font-size:148px; fill:var(--ink); }
-    .timesig{ font-family: Georgia, serif; font-size:54px; font-weight:900; fill:var(--ink); }
-
-    .status{
-      padding:10px 14px;
-      border-top:1px solid rgba(63,43,150,.16);
-      background:var(--panel-2);
-      font-size:13px;
-      font-weight:800;
-      color:#333;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    @media (max-width: 860px){
-      header{ padding:12px; }
-      .app{ width:100%; grid-template-columns:1fr; gap:12px; }
-      .sidebar{ position:static; }
-      .brand{ margin-bottom:10px; }
-      .music-nerd{ margin:10px 0 12px; }
-      .toolbar{ align-items:stretch; }
-      .toolbar-left, .toolbar-right{ width:100%; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); }
-      .tempo-pill{ display:grid; place-items:center; }
-      .canvas-wrap{ padding:10px; }
-      svg{ min-width:860px; height:430px; }
-    }
-
-    @media (max-width: 520px){
-      .sidebar{ padding:14px; }
-      .btn-grid{ gap:7px; }
-      button{ padding:10px 8px; font-size:14px; }
-      .toolbar-left, .toolbar-right{ gap:7px; }
-      .status{ font-size:12px; }
-    }
+.status,
+.status-bar{
+  background:var(--panel-2);
+  border-top:3px solid var(--ink);
+  color:#333;
+  font-size:13px;
+  font-weight:800;
+}
   </style>
 </head>
 <body>
