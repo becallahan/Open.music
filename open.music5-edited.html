@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Open.Music 5.1</title>
+<style>
+:root{
+  --navy:#070b1b;--navy2:#111936;--purple:#6655ff;--blue:#2f86ff;--ink:#101624;
+  --muted:#667085;--line:#d8dfec;--paper:#fff;--soft:#f7f9ff;--red:#dc2626;
+  --green:#16a34a;--orange:#f59e0b;--pink:#d946ef;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;color:var(--ink);
+  font-family:ui-rounded,"SF Pro Rounded","Aptos Rounded","Trebuchet MS",system-ui,sans-serif;
+  background:radial-gradient(circle at 18% 8%,rgba(102,85,255,.34),transparent 30%),
+             radial-gradient(circle at 82% 12%,rgba(47,134,255,.28),transparent 32%),
+             linear-gradient(135deg,#070b1b,#281b5a 58%,#101936);
+}
+button,select,input{font:inherit}
+button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:11px 15px;font-weight:900;cursor:pointer;box-shadow:0 8px 20px rgba(16,24,40,.08)}
+button:active{transform:translateY(1px)}
+.app{max-width:1360px;margin:auto;padding:16px}
+.top{color:white;display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:center;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:14px}.logo{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(145deg,#8d61ff,#2f86ff);font-size:36px;box-shadow:0 18px 40px rgba(47,134,255,.35)}
+h1{margin:0;font-size:31px;letter-spacing:-.055em}.brand p{margin:2px 0 0;color:#dfe7ff}
+.transport{display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap}
+.play{background:linear-gradient(145deg,var(--purple),var(--blue));color:white;border:0;font-size:18px;padding:16px 24px}.stop{font-size:18px;padding:16px 22px}
+.tempo{height:60px;min-width:360px;display:flex;align-items:center;gap:14px;padding:10px 18px;border-radius:18px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16)}
+.tempo label{font-weight:950}.tempo input{width:140px;accent-color:var(--purple)}.tempo strong{color:#9aacff;font-size:22px}
+.toggle{display:flex;gap:5px;background:rgba(6,10,25,.6);border:1px solid rgba(255,255,255,.16);padding:5px;border-radius:16px}
+.toggle button{background:transparent;color:white;border:0;box-shadow:none;padding:10px 14px}.toggle .active{background:linear-gradient(145deg,var(--purple),var(--blue))}
+.actions{display:flex;gap:12px;align-items:center}.actions button{background:transparent;color:white;border:0;box-shadow:none;display:flex;flex-direction:column;gap:2px;align-items:center}.actions .ico{font-size:26px}.actions small{color:#dce4f5}
+.shell{background:rgba(255,255,255,.97);border-radius:24px;overflow:hidden;box-shadow:0 28px 78px rgba(0,0,0,.34)}
+.tools{display:flex;gap:12px;overflow-x:auto;padding:16px;background:linear-gradient(180deg,#fff,#f7f9ff);border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
+.tool{min-width:116px;height:58px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:10px}.tool .sym{font-size:30px}.tool.active{color:#365cff;border-color:#526eff;box-shadow:0 0 0 4px rgba(82,110,255,.13)}.tool[data-tool=erase]{color:var(--red)}
+.controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--line);background:#fff}
+.controls label{font-weight:900}.controls select{border:1px solid var(--line);border-radius:11px;padding:8px 12px;background:white;font-weight:850}.controls .spacer{flex:1}
+.part-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.part-controls button{box-shadow:none;padding:8px 10px;border-radius:999px}
+.part-controls button.active{background:linear-gradient(145deg,var(--purple),var(--blue));color:white;border-color:transparent}
+.part-controls select{border:1px solid var(--line);border-radius:999px;padding:8px 10px;background:white;font-weight:850}
+.content{display:grid;grid-template-columns:1fr 250px;gap:18px;padding:14px;padding-bottom:104px}
+.score-card{position:relative;border:1px solid var(--line);border-radius:18px;background:white;overflow:hidden;min-height:620px;box-shadow:0 14px 28px rgba(16,24,40,.07)}
+#score,#roll{display:block;width:100%;height:620px;background:#fff;touch-action:manipulation}
+.cursor{position:absolute;top:72px;height:470px;width:4px;left:222px;background:#315eff;border-radius:99px;box-shadow:0 0 0 8px rgba(49,94,255,.12);pointer-events:none;z-index:5}
+.cursor:before{content:"";position:absolute;left:50%;top:-12px;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid #315eff}
+.add{position:absolute;left:26px;right:26px;bottom:18px;min-height:42px;padding:8px 12px;border:2px dashed #d6deed;border-radius:16px;display:grid;place-items:center;color:#596579;font-weight:900;background:rgba(255,255,255,.82);text-align:center}
+.side{display:flex;flex-direction:column;gap:16px}.card{background:linear-gradient(180deg,#fff,#f7f9ff);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 18px 38px rgba(16,24,40,.10)}
+.face{
+  text-align:center;
+  color:#575cff;
+  font-size:64px;
+  font-weight:950;
+  letter-spacing:-.14em;
+  line-height:1;
+  margin:3px 0 4px;
+  filter:drop-shadow(0 12px 18px rgba(87,92,255,.28));
+  animation: nerdBob 2.7s ease-in-out infinite;
+}
+@keyframes nerdBob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-6px) rotate(1deg)}}
+.nerd-name{
+  text-align:center;
+  font-weight:950;
+  color:#101624;
+  margin-bottom:6px;
+  letter-spacing:-.02em;
+}
+.nerd-body{
+  width:132px;
+  height:118px;
+  margin:0 auto 12px;
+  position:relative;
+  display:grid;
+  place-items:center;
+}
+.nerd-note-stack{
+  position:absolute;
+  width:76px;
+  height:92px;
+  bottom:6px;
+  left:50%;
+  transform:translateX(-50%);
+}
+.nerd-note-stack span{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%) rotate(-11deg);
+  width:70px;
+  height:44px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#ffffff,#eef1ff);
+  box-shadow:
+    0 8px 18px rgba(87,92,255,.20),
+    inset 0 0 0 3px rgba(87,92,255,.88);
+}
+.nerd-note-stack span:nth-child(1){top:0}
+.nerd-note-stack span:nth-child(2){top:25px}
+.nerd-note-stack span:nth-child(3){top:50px}
+.nerd-body:after{
+  content:"♪";
+  position:absolute;
+  right:6px;
+  top:12px;
+  font-size:28px;
+  color:#6655ff;
+  animation: musicWiggle 1.4s ease-in-out infinite;
+}
+.nerd-arm-left,.nerd-arm-right{
+  position:absolute;
+  width:42px;
+  height:5px;
+  background:#575cff;
+  border-radius:999px;
+  top:55px;
+  transform-origin:center;
+  z-index:2;
+}
+.nerd-arm-left{left:0;transform:rotate(-28deg)}
+.nerd-arm-right{right:0;transform:rotate(25deg)}
+.nerd-baton{
+  position:absolute;
+  right:-15px;
+  top:31px;
+  width:54px;
+  height:4px;
+  background:#101624;
+  border-radius:999px;
+  transform:rotate(-42deg);
+  box-shadow:0 0 0 2px rgba(255,255,255,.7);
+  z-index:3;
+}
+.nerd-leg-left,.nerd-leg-right{
+  position:absolute;
+  width:5px;
+  height:30px;
+  background:#575cff;
+  border-radius:999px;
+  bottom:-6px;
+  z-index:1;
+}
+.nerd-leg-left{left:49px;transform:rotate(14deg)}
+.nerd-leg-right{right:49px;transform:rotate(-14deg)}
+@keyframes musicWiggle{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(12deg) scale(1.12)}}
+.nerd-console{
+  background:#07111f;
+  color:#f4fff7;
+  border-radius:18px;
+  padding:15px 15px 17px;
+  border:2px solid rgba(102,85,255,.6);
+  font-family:"Courier New",monospace;
+  font-size:18px;
+  font-weight:850;
+  line-height:1.55;
+  letter-spacing:.02em;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    0 0 18px rgba(102,85,255,.22);
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.16),
+    0 0 8px rgba(136,255,180,.24);
+  position:relative;
+}
+.nerd-console:before{
+  content:"╭ Music Nerd says...";
+  display:block;
+  color:#9cffc0;
+  font-weight:950;
+  margin-bottom:7px;
+  text-shadow:0 0 10px rgba(156,255,192,.7);
+}
+.nerd-console:after{
+  content:"▋";
+  color:#9cffc0;
+  animation: blinkCursor .8s steps(1) infinite;
+  margin-left:3px;
+}
+@keyframes blinkCursor{50%{opacity:0}}
+.nerd-console strong{
+  color:#9cffc0;
+  text-shadow:
+    0 0 10px rgba(156,255,192,.7),
+    0 0 18px rgba(156,255,192,.35);
+}
+.nerd-hi{
+  color:#ffe66d;
+  font-weight:950;
+  text-shadow:
+    1px 1px 0 #7c4a03,
+    0 0 9px rgba(255,230,109,.72),
+    0 0 16px rgba(255,230,109,.36);
+}
+.nerd-chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.nerd-chip{font-size:11px;font-weight:950;border-radius:999px;background:#eef1ff;color:#4351dc;padding:6px 8px}
+.card p{line-height:1.52;margin:0 0 10px}.lesson{border:2px solid #6655ff}.lesson h3{color:#505cff;margin:0 0 12px;font-size:23px}.lesson-body{display:grid;grid-template-columns:52px 1fr;gap:14px}.lesson-sym{font-size:52px;line-height:1}
+.tip-list{margin:10px 0 0;padding-left:18px;color:#42526a}.tip-list li{margin:4px 0}.sound-badge{display:inline-block;border-radius:999px;background:#fff4d7;color:#7c4a03;padding:3px 7px;font-weight:950}
+.mini{margin-top:auto;align-self:flex-end;width:88px;height:88px;border-radius:32px;background:white;display:grid;place-items:center;color:#575cff;font-size:36px;font-weight:950;letter-spacing:-.14em;box-shadow:0 18px 40px rgba(16,24,40,.13)}
+.hidden{display:none!important}
+
+.float-transport{
+  position:fixed;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%);
+  z-index:50;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  width:min(920px, calc(100vw - 20px));
+  padding:10px;
+  border-radius:24px;
+  background:rgba(7,11,27,.88);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 22px 60px rgba(0,0,0,.38);
+  backdrop-filter:blur(12px);
+}
+.float-transport button{
+  min-height:54px;
+  border-radius:18px;
+  font-size:17px;
+}
+.float-transport .play{padding:14px 24px}
+.float-transport .stop{padding:14px 22px}
+.float-transport .tempo{
+  min-width:250px;
+  height:54px;
+  color:white;
+}
+.float-transport .volume{
+  height:54px;
+  min-width:210px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  color:white;
+  font-weight:950;
+}
+.float-transport .volume input{width:92px;accent-color:#ffe66d}
+.repeat-btn.active{
+  background:#ffe66d;
+  color:#101624;
+  box-shadow:0 0 0 4px rgba(255,230,109,.18),0 8px 20px rgba(16,24,40,.08);
+}
+.touch-note{
+  color:#dfe7ff;
+  font-size:12px;
+  font-weight:850;
+  max-width:180px;
+  line-height:1.2;
+}
+.top .transport .play,.top .transport .stop,.top .transport .tempo{display:none}
+
+@media(max-width:950px){.app{padding:10px}.top{grid-template-columns:1fr}.transport{justify-content:flex-start}.actions{overflow-x:auto}.tempo{min-width:100%}.content{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.mini{display:none}}
+@media(max-width:620px){.side{grid-template-columns:1fr}.score-card{min-height:560px}#score,#roll{height:560px}.cursor{top:70px;height:425px}.float-transport{bottom:8px}.float-transport .tempo{min-width:100%;order:3}.float-transport .volume{min-width:100%;order:4;justify-content:center}.touch-note{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="logo">♪</div><div><h1>Open.Music</h1><p>A modern beginner<br>composer for real notation.</p></div></div>
+    <div class="transport">
+      <button class="play" id="play">▶ Play</button><button class="stop" id="stop">■ Stop</button>
+      <div class="tempo"><label>Tempo</label><input id="tempo" type="range" min="40" max="200" value="90"><strong><span id="bpm">90</span> BPM</strong></div>
+      <div class="toggle"><button id="notationBtn" class="active">Staff</button><button id="rollBtn">Piano Roll</button></div>
+    </div>
+    <div class="actions">
+      <button id="undo"><span class="ico">↶</span><small>Undo</small></button>
+      <button id="redo"><span class="ico">↷</span><small>Redo</small></button>
+      <button id="clear"><span class="ico">⌫</span><small>Clear</small></button>
+      <button id="midi"><span class="ico">▣</span><small>Save MIDI</small></button>
+      <button id="settings"><span class="ico">⚙</span><small>Settings</small></button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="tools" id="tools">
+      <button class="tool active" data-tool="quarter"><span class="sym">♩</span>Quarter</button>
+      <button class="tool" data-tool="eighth"><span class="sym">♫</span>Eighth</button>
+      <button class="tool" data-tool="half"><span class="sym">𝅗𝅥</span>Half</button>
+      <button class="tool" data-tool="whole"><span class="sym">𝅝</span>Whole</button>
+      <button class="tool" data-tool="rest"><span class="sym">𝄽</span>Rest</button>
+      <button class="tool" data-tool="erase"><span class="sym">⌫</span>Erase</button>
+    </nav>
+
+    <section class="controls">
+      <label>Key: <select id="key"><option selected>C Major</option></select></label>
+      <label>Time: <select id="time"><option selected>4/4</option></select></label>
+      <div class="part-controls">
+        <button id="stemFlip">↕ Stem Flip</button>
+        <label>Sound:
+          <select id="instrument">
+            <option value="piano" selected>Friendly Piano</option>
+            <option value="robot">Robot Choir</option>
+            <option value="duck">Duck Kazoo</option>
+            <option value="space">Space Bells</option>
+            <option value="frog">Frog Bass</option>
+            <option value="chip">8-Bit Game</option>
+            <option value="ghost">Ghost Flute</option>
+            <option value="alien">Alien Wiggle</option>
+          </select>
+        </label>
+      </div>
+      <span class="spacer"></span>
+      <strong>C major · C4 to C6 · auto voices · silly sounds</strong>
+    </section>
+
+    <section class="content">
+      <section>
+        <div class="score-card">
+          <svg id="score" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg>
+          <svg id="roll" class="hidden" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="cursor" id="cursor"></div>
+          <div class="add" id="status">Click staff or grid to add notes. Empty spaces stay blank for now.</div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <div class="card">
+          <div class="face" id="nerdFace">(◕‿◕)</div>
+          <div class="nerd-name">Music Nerd</div>
+          <div class="nerd-body" aria-hidden="true">
+            <div class="nerd-note-stack"><span></span><span></span><span></span></div>
+            <span class="nerd-arm-left"></span>
+            <span class="nerd-arm-right"></span>
+            <span class="nerd-baton"></span>
+            <span class="nerd-leg-left"></span>
+            <span class="nerd-leg-right"></span>
+          </div>
+          <div class="nerd-console" id="nerdConsole">
+            <strong>&gt; booting...</strong><br>
+            Rhythm grid online. Treble clef calibrated. Ready to make tiny masterpieces.
+          </div>
+          <div class="nerd-chip-row">
+            <span class="nerd-chip">8-slot measures</span>
+            <span class="nerd-chip">C major</span>
+            <span class="nerd-chip">silly sounds</span>
+          </div>
+        </div>
+        <div class="card lesson">
+          <h3 id="helpTitle">Quarter Note</h3>
+          <div class="lesson-body">
+            <div class="lesson-sym" id="helpSym">♩</div>
+            <div>
+              <p id="helpText">Duration: 1 beat. Measures use 8 eighth-note slots. Use Stem Flip for part-writing direction.</p>
+              <p><strong>Music Nerd says:</strong> <span id="nerdTip">Quarter notes are the sturdy walking shoes of rhythm.</span></p>
+            </div>
+          </div>
+          <ul class="tip-list">
+            <li>Empty spaces stay blank for now.</li>
+            <li>Eighth notes beam only as beat-pairs.</li>
+            <li>Stack notes to create automatic parts.</li>
+          </ul>
+        </div>
+        <div class="mini" id="miniNerd">O‿O</div>
+      </aside>
+    </section>
+  </main>
+</div>
+
+<script>
+const score=document.getElementById('score'), roll=document.getElementById('roll'), cursor=document.getElementById('cursor'), status=document.getElementById('status');
+const tempo=document.getElementById('tempo'), bpm=document.getElementById('bpm'), tempoFloat=document.getElementById('tempoFloat'), bpmFloat=document.getElementById('bpmFloat'), volume=document.getElementById('volume'), volRead=document.getElementById('volRead'), repeatBtn=document.getElementById('repeatBtn');
+const notationBtn=document.getElementById('notationBtn'), rollBtn=document.getElementById('rollBtn');
+let tool='quarter', audioCtx, playing=false, history=[], redoStack=[], view='staff', currentStem='auto', repeatOn=false, playbackTimers=[], playbackRaf=null;
+const TOUCH_Y_OFFSET = 18; // Tablet fingers visually cover the target; this maps touch slightly lower.
+const voiceColors={1:'#2f86ff',2:'#16a34a',3:'#f59e0b',4:'#d946ef'};
+const voiceNames={1:'melody',2:'harmony',3:'counterline',4:'extra part'};
+const pitchNames={60:'C4',62:'D4',64:'E4',65:'F4',67:'G4',69:'A4',71:'B4',72:'C5',74:'D5',76:'E5',77:'F5',79:'G5',81:'A5',83:'B5',84:'C6'};
+const pitches=[60,62,64,65,67,69,71,72,74,76,77,79,81,83,84];
+let notes=[
+  {p:64,b:0,d:.5,v:1,s:'auto',inst:'piano'},{p:67,b:.5,d:.5,v:1,s:'auto',inst:'piano'},{p:72,b:1,d:1,v:1,s:'auto',inst:'piano'},{p:71,b:2,d:1,v:1,s:'auto',inst:'piano'},{p:69,b:3,d:1,v:1,s:'auto',inst:'piano'},
+  {p:60,b:0,d:4,v:2,s:'down',inst:'frog'},{p:64,b:4,d:4,v:2,s:'down',inst:'frog'},{p:65,b:8,d:4,v:2,s:'down',inst:'frog'},{p:67,b:12,d:4,v:2,s:'down',inst:'frog'},
+  {p:76,b:4,d:1,v:3,s:'up',inst:'space'},{p:74,b:5,d:1,v:3,s:'up',inst:'space'},{p:72,b:6,d:1,v:3,s:'up',inst:'space'},{p:71,b:7,d:1,v:3,s:'up',inst:'space'}
+];
+const help={
+  quarter:['Quarter Note','♩','Duration: 1 beat.','Quarter notes are the sturdy walking shoes of rhythm.'],
+  eighth:['Eighth Note','♪','Duration: 1/2 beat. Two eighths beam only inside the same beat.','One eighth gets a flag. Two friendly eighths in one beat get a beam.'],
+  half:['Half Note','𝅗𝅥','Duration: 2 beats.','Half notes are long enough to wave politely.'],
+  whole:['Whole Note','𝅝','Duration: 4 beats.','Whole notes are the sleepy whales of notation.'],
+  rest:['Rest','𝄽','Optional silence. Blank spaces can stay blank for now.','A rest is music taking a tiny snack break.'],
+  erase:['Erase','⌫','Click a note or rest to remove it.','No shame. Composers erase constantly. Beethoven had crumbs everywhere.']
+};
+
+function E(n,a={}){let e=document.createElementNS('http://www.w3.org/2000/svg',n);for(let k in a)e.setAttribute(k,a[k]);return e}
+function T(parent,s,a={}){let t=E('text',a);t.textContent=s;parent.append(t);return t}
+function clone(){return JSON.parse(JSON.stringify(notes))}
+function push(){history.push(clone()); if(history.length>80)history.shift(); redoStack=[]}
+
+const staffTop=178, gap=28, staffLeft=40, staffRight=1145;
+// Treble staff mapping: E4 bottom line, G4 second line, B4 middle, D5 fourth, F5 top.
+// Each diatonic step is gap/2.
+function diatonicIndex(midi){
+  const order={60:0,62:1,64:2,65:3,67:4,69:5,71:6,72:7,74:8,76:9,77:10,79:11,81:12,83:13,84:14};
+  return order[midi] ?? 0;
+}
+function yPitch(p){ return staffTop + 4*gap - ((diatonicIndex(p)-2) * gap/2); }
+function xBeat(b){ return 225 + b*56; }
+function beatFromX(x){ return Math.max(0,Math.min(15.5,Math.round(((x-225)/56)*2)/2)); }
+function pitchFromY(y){
+  let best=pitches[0], dist=9999;
+  for(const p of pitches){let d=Math.abs(yPitch(p)-y); if(d<dist){dist=d;best=p}}
+  return best;
+}
+function dur(){return {eighth:.5,quarter:1,half:2,whole:4,rest:1}[tool]||1}
+
+function measureStartBeat(b){ return Math.floor(b/4)*4; }
+function fitsInMeasure(b,duration){
+  const start = measureStartBeat(b);
+  return b + duration <= start + 4;
+}
+function notesAtSlot(b){
+  return notes.filter(n => Math.abs(n.b-b)<0.001);
+}
+function nextAutoVoice(b,duration){
+  // Automatically create stacked/independent parts.
+  // First note at a time uses voice 1, second stacked note uses voice 2, etc.
+  const used = new Set(notesAtSlot(b).map(n => n.v||1));
+  for(let v=1; v<=4; v++){
+    if(!used.has(v)) return v;
+  }
+  return 4;
+}
+function stemFor(note){
+  if(note.s==='up') return 'up';
+  if(note.s==='down') return 'down';
+  // Automatic beginner-friendly part-writing convention:
+  // melody/counterline up, harmony/bass down.
+  if((note.v||1)===2 || (note.v||1)===4) return 'down';
+  return 'up';
+}
+function setStatus(msg){ status.textContent = msg; }
+function highlightNerdWords(msg){
+  const hot = ['Repeat','Loop','Volume','Tempo','Play','Stop','Quarter','Eighth','Stem','Duck','Robot','Alien','Space','Frog','Ghost','C4','C6','barline','measure','voice','melody','harmony'];
+  let safe = String(msg).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  hot.forEach(word=>{
+    safe = safe.replace(new RegExp(`\\b(${word})\\b`,'gi'), '<span class="nerd-hi">$1</span>');
+  });
+  return safe;
+}
+function nerdSay(msg, face='(◕‿◕)'){
+  const c=document.getElementById('nerdConsole');
+  const f=document.getElementById('nerdFace');
+  const m=document.getElementById('miniNerd');
+  if(c)c.innerHTML=`<strong>&gt;</strong> ${highlightNerdWords(msg)}`;
+  if(f)f.textContent=face;
+  if(m)m.textContent=face;
+}
+function soundSlogan(inst){
+  return {
+    piano:'Friendly Piano selected. Respectable. Trustworthy. Wears a tiny cardigan.',
+    robot:'Robot Choir selected. [◉‿◉] Beep boop, but make it musical.',
+    duck:'Duck Kazoo selected. QUACK. This is serious music now.',
+    space:'Space Bells selected. Your melody has entered orbit.',
+    frog:'Frog Bass selected. Ribbit, but with harmonic purpose.',
+    chip:'8-Bit Game selected. Your composition found a secret level.',
+    ghost:'Ghost Flute selected. Spooky, but with good intonation.',
+    alien:'Alien Wiggle selected. I do not know what planet this melody came from, but I like it.'
+  }[inst]||'Sound selected. Proceed with musical bravery.';
+}
+
+function drawStaff(){
+  for(let i=0;i<5;i++) score.append(E('line',{x1:staffLeft,y1:staffTop+i*gap,x2:staffRight,y2:staffTop+i*gap,stroke:'#05070d','stroke-width':1.8}));
+
+  // Standard treble-clef placement:
+  // The spiral of the clef should curl around the G line, which is the second line from the bottom.
+  // This text glyph is positioned so its visual spiral centers near y = staffTop + 3*gap.
+  T(score,'𝄞',{x:44,y:staffTop+116,'font-size':178,'font-family':'Georgia, "Times New Roman", serif',fill:'#05070d'});
+
+  T(score,'4',{x:145,y:staffTop+58,'font-size':70,'font-weight':950,fill:'#05070d'});
+  T(score,'4',{x:145,y:staffTop+116,'font-size':70,'font-weight':950,fill:'#05070d'});
+
+  for(let s=0;s<=32;s++){
+    let x=xBeat(s/2)-18;
+    score.append(E('line',{x1:x,y1:staffTop-24,x2:x,y2:staffTop+gap*4+24,stroke:s%8===0?'rgba(5,7,13,.25)':(s%2===0?'rgba(5,7,13,.14)':'rgba(5,7,13,.07)'),'stroke-width':s%8===0?1.2:.8,'stroke-dasharray':s%8===0?'':'3 7'}));
+  }
+  for(let m=0;m<=4;m++){
+    let x=xBeat(m*4)-18;
+    score.append(E('line',{x1:x,y1:staffTop,x2:x,y2:staffTop+gap*4,stroke:'#05070d','stroke-width':m==4?5:1.6}));
+    if(m<4) T(score,String(m+1),{x:x+6,y:92,'font-size':16,'font-weight':850,fill:'#101624'});
+  }
+
+  // Ledger helper labels at the left for C4-C6.
+  for(const p of pitches){
+    T(score,pitchNames[p],{x:staffLeft+2,y:yPitch(p)+4,'font-size':11,fill:'rgba(16,22,36,.38)','font-weight':800});
+  }
+}
+
+function ledgerLines(x,p){
+  const y=yPitch(p), bottom=staffTop+4*gap, top=staffTop;
+  const lines=[];
+  // below staff: D4 space, C4 ledger line
+  if(p<=60) lines.push(yPitch(60));
+  // above staff ledger lines at A5/C6; C6 has two ledger lines above treble staff
+  if(p>=81) lines.push(yPitch(81));
+  if(p>=84) lines.push(yPitch(84));
+  for(const ly of lines){
+    score.append(E('line',{x1:x-18,y1:ly,x2:x+18,y2:ly,stroke:'#05070d','stroke-width':1.8}));
+  }
+}
+
+function drawNote(n, beamed=false){
+  const x=xBeat(n.b), y=n.rest?staffTop+42:yPitch(n.p), col=voiceColors[n.v]||'#05070d';
+  if(n.rest){
+    T(score,'𝄽',{x:x-10,y,'font-size':34,fill:col});
+    return;
+  }
+  ledgerLines(x,n.p);
+  if(n.d>=4){
+    score.append(E('ellipse',{cx:x,cy:y,rx:14,ry:8,fill:'white',stroke:col,'stroke-width':4,transform:`rotate(-15 ${x} ${y})`}));
+    return;
+  }
+
+  const stemDir = stemFor(n);
+  const stemUp = stemDir === 'up';
+  const stemX = stemUp ? x+9 : x-9;
+  const stemEndY = stemUp ? y-48 : y+48;
+
+  score.append(E('ellipse',{cx:x,cy:y,rx:10,ry:7,fill:n.d>=2?'white':col,stroke:col,'stroke-width':3,transform:`rotate(-16 ${x} ${y})`}));
+  score.append(E('line',{x1:stemX,y1:y,x2:stemX,y2:stemEndY,stroke:col,'stroke-width':3}));
+
+  // Only lone eighth notes get one flag. Quarter notes never get flags.
+  if(n.d===.5 && !beamed){
+    const d = stemUp
+      ? `M ${stemX} ${stemEndY} q 20 6 31 18`
+      : `M ${stemX} ${stemEndY} q -20 -6 -31 -18`;
+    score.append(E('path',{d,fill:'none',stroke:col,'stroke-width':3}));
+  }
+}
+
+function renderScore(){
+  score.innerHTML=''; drawStaff();
+
+  // Eighth beams: exactly two eighth notes, same beat, same automatic part/voice.
+  const pairedIds = new Set();
+  const eighthGroups = {};
+
+  notes.forEach((n,idx)=>{
+    if(!n.rest && n.d===.5){
+      const beatStart = Math.floor(n.b);
+      const slotInBeat = Math.round((n.b - beatStart) * 2);
+      const key = `${n.v}-${beatStart}`;
+      (eighthGroups[key]||(eighthGroups[key]=[])).push({...n, idx, beatStart, slotInBeat});
+    }
+  });
+
+  Object.values(eighthGroups).forEach(group=>{
+    const first = group.find(n=>n.slotInBeat===0);
+    const second = group.find(n=>n.slotInBeat===1);
+    if(first && second){
+      pairedIds.add(first.idx);
+      pairedIds.add(second.idx);
+    }
+  });
+
+  notes.forEach((n,idx)=>drawNote(n, pairedIds.has(idx)));
+
+  Object.values(eighthGroups).forEach(group=>{
+    const first = group.find(n=>n.slotInBeat===0);
+    const second = group.find(n=>n.slotInBeat===1);
+    if(first && second){
+      const a={x:xBeat(first.b),y:yPitch(first.p),v:first.v,s:stemFor(first)};
+      const b={x:xBeat(second.b),y:yPitch(second.p),v:second.v,s:stemFor(second)};
+      const up = a.s === 'up';
+      const y = up ? Math.min(a.y,b.y)-48 : Math.max(a.y,b.y)+48;
+      const xOffset = up ? 9 : -9;
+      const col=voiceColors[a.v]||'#05070d';
+      score.append(E('line',{x1:a.x+xOffset,y1:y,x2:b.x+xOffset,y2:y,stroke:col,'stroke-width':7}));
+    }
+  });
+}
+
+function renderRoll(){
+  roll.innerHTML='';
+  roll.append(E('rect',{x:0,y:0,width:1180,height:420,fill:'#ffffff'}));
+  const top=86,rowH=30,left=92,right=1148;
+  [...pitches].reverse().forEach((p,i)=>{
+    const y=top+i*rowH;
+    roll.append(E('rect',{x:0,y:y-4,width:1180,height:rowH,fill:i%2?'#fbfcff':'#f5f7ff'}));
+    roll.append(E('line',{x1:left,y1:y+rowH-4,x2:right,y2:y+rowH-4,stroke:'#e8ecf4'}));
+    T(roll,pitchNames[p],{x:42,y:y+12,'font-size':13,fill:'#101624','font-weight':850});
+  });
+  for(let b=0;b<=16;b++){
+    const x=xBeat(b)-90;
+    roll.append(E('line',{x1:x,y1:70,x2:x,y2:555,stroke:b%4?'#eef2f8':'#cfd7e6','stroke-width':b%4?1:1.8}));
+    if(b%4===0&&b<16) T(roll,String(b/4+1),{x:x+6,y:20,'font-size':14,'font-weight':850,fill:'#101624'});
+  }
+  notes.forEach(n=>{
+    if(n.rest)return;
+    const reversedIndex=[...pitches].reverse().indexOf(n.p);
+    const x=xBeat(n.b)-90, y=top+reversedIndex*rowH+4, w=Math.max(28,n.d*56), col=voiceColors[n.v]||'#2f86ff';
+    roll.append(E('rect',{x,y,width:w,height:20,rx:6,fill:col,opacity:.92}));
+  });
+}
+
+function render(){renderScore();renderRoll();}
+
+function masterVolume(){ return Math.max(0, Math.min(1, Number(volume.value)/100)); }
+function beep(midi,sec=.22,delay=0,voice=1,inst='piano'){
+  audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();
+  const start=audioCtx.currentTime+delay;
+  const freq=440*Math.pow(2,(midi-69)/12);
+
+  function osc(type,f,detune=0,gainVal=.11,stop=sec){
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type=type; o.frequency.value=f; o.detune.value=detune;
+    g.gain.setValueAtTime(.001,start);
+    g.gain.exponentialRampToValueAtTime(gainVal*masterVolume(),start+.012);
+    g.gain.exponentialRampToValueAtTime(.001,start+stop);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(start); o.stop(start+stop+.05);
+  }
+
+  if(inst==='piano'){
+    osc('sine',freq,0,.12,sec);
+    osc('triangle',freq*2,0,.035,sec*.55);
+  }else if(inst==='robot'){
+    osc('square',freq,0,.065,sec);
+    osc('square',freq*1.5,0,.04,sec*.85);
+    osc('sawtooth',freq*.5,0,.025,sec);
+  }else if(inst==='duck'){
+    // Silly nasal kazoo-ish quack using fast pitch bend.
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(freq*1.08,start);
+    o.frequency.exponentialRampToValueAtTime(freq*.78,start+Math.min(.18,sec*.6));
+    g.gain.setValueAtTime(.001,start);
+    g.gain.exponentialRampToValueAtTime(.13*masterVolume(),start+.01);
+    g.gain.exponentialRampToValueAtTime(.001,start+sec*.75);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(start); o.stop(start+sec+.04);
+  }else if(inst==='space'){
+    osc('sine',freq,0,.09,sec*1.4);
+    osc('sine',freq*2.01,7,.035,sec*1.2);
+    osc('triangle',freq*3,0,.018,sec);
+  }else if(inst==='frog'){
+    osc('square',freq*.5,0,.13,sec*.9);
+    osc('sine',freq*.25,0,.055,sec);
+  }else if(inst==='chip'){
+    osc('square',freq,0,.11,Math.min(sec,.22));
+  }else if(inst==='ghost'){
+    osc('sine',freq*1.01,0,.06,sec*1.6);
+    osc('sine',freq*2.02,0,.025,sec*1.4);
+  }else if(inst==='alien'){
+    const o=audioCtx.createOscillator(), lfo=audioCtx.createOscillator(), lfoGain=audioCtx.createGain(), g=audioCtx.createGain();
+    o.type='triangle'; o.frequency.value=freq;
+    lfo.type='sine'; lfo.frequency.value=8;
+    lfoGain.gain.value=18;
+    lfo.connect(lfoGain).connect(o.frequency);
+    g.gain.setValueAtTime(.001,start);
+    g.gain.exponentialRampToValueAtTime(.11*masterVolume(),start+.015);
+    g.gain.exponentialRampToValueAtTime(.001,start+sec);
+    o.connect(g).connect(audioCtx.destination);
+    lfo.start(start); o.start(start);
+    lfo.stop(start+sec+.05); o.stop(start+sec+.05);
+  }else{
+    osc('sine',freq,0,.11,sec);
+  }
+}
+
+function addAt(x,y){
+  if(tool==='erase'){
+    let bi=-1,bd=9999;
+    notes.forEach((n,i)=>{
+      let nx=view==='roll'?xBeat(n.b)-90:xBeat(n.b);
+      let ny=n.rest?staffTop+42:(view==='roll'?86+[...pitches].reverse().indexOf(n.p)*30+8:yPitch(n.p));
+      let d=Math.hypot(nx-x,ny-y);
+      if(d<bd){bd=d;bi=i}
+    });
+    if(bi>=0&&bd<42){
+      push();
+      notes.splice(bi,1);
+      render();
+      setStatus('Erased. Empty slots remain blank.'); nerdSay('Erased cleanly. The measure has forgiven you.','(⊙_⊙)');
+    }
+    return;
+  }
+
+  let b=view==='roll'?beatFromX(x+90):beatFromX(x);
+  let duration = dur();
+
+  if(!fitsInMeasure(b,duration)){
+    setStatus('That rhythm would cross the barline. Use a shorter value or start earlier.'); nerdSay('Barline detected! That note is trying to escape the measure.','(⊙_⊙)');
+    return;
+  }
+
+  let p;
+  if(view==='roll'){
+    const row=Math.round((y-86-8)/30);
+    p=[...pitches].reverse()[Math.max(0,Math.min(pitches.length-1,row))];
+  }else{
+    p=pitchFromY(y);
+  }
+
+  const chosenVoice = nextAutoVoice(b,duration);
+  const inst = document.getElementById('instrument').value;
+  const stemSetting = currentStem;
+
+  push();
+
+  if(tool==='rest'){
+    notes.push({p,b,d:duration,rest:true,v:chosenVoice,s:stemSetting,inst});
+    setStatus('Manual rest placed. Blank slots are still allowed.'); nerdSay('A rest! Silence, but make it official.','(-‿-)');
+  }else{
+    notes.push({p,b,d:duration,v:chosenVoice,s:stemSetting,inst});
+    beep(p,.28,0,chosenVoice,inst);
+    setStatus(`${pitchNames[p]} placed as ${voiceNames[chosenVoice]} using ${document.getElementById('instrument').selectedOptions[0].text}.`); nerdSay(`${pitchNames[p]} added as ${voiceNames[chosenVoice]}. ${soundSlogan(inst)}`, chosenVoice===1?'☆◕‿◕☆':chosenVoice===2?'(◕‿◕)':chosenVoice===3?'[◉‿◉]':'(⊙_⊙)');
+  }
+
+  notes.sort((a,b)=>a.b-b.b||a.v-b.v||a.p-b.p);
+  render();
+}
+
+score.addEventListener('click',ev=>{
+  if(view!=='staff')return;
+  let r=score.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*1180,y=(ev.clientY-r.top)/r.height*620 + TOUCH_Y_OFFSET;
+  addAt(x,y);
+});
+roll.addEventListener('click',ev=>{
+  if(view!=='roll')return;
+  let r=roll.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*1180,y=(ev.clientY-r.top)/r.height*620 + TOUCH_Y_OFFSET;
+  addAt(x,y);
+});
+
+document.getElementById('tools').onclick=ev=>{
+  let btn=ev.target.closest('.tool');if(!btn)return;
+  document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');tool=btn.dataset.tool;
+  let h=help[tool];helpTitle.textContent=h[0];helpSym.textContent=h[1];helpText.textContent=h[2];
+  const tip=document.getElementById('nerdTip'); if(tip)tip.textContent=h[3];
+  nerdSay(h[3], tool==='erase'?'(⊙_⊙)':tool==='eighth'?'☆◕‿◕☆':'(◕‿◕)');
+};
+stemFlip.onclick=()=>{
+  currentStem = currentStem === 'auto' ? 'down' : currentStem === 'down' ? 'up' : 'auto';
+  stemFlip.classList.toggle('active', currentStem !== 'auto');
+  stemFlip.textContent = currentStem === 'auto' ? '↕ Stem Flip' : currentStem === 'down' ? '↓ Stems Down' : '↑ Stems Up';
+  setStatus(currentStem === 'auto' ? 'Automatic stem direction restored.' : `New notes will use stems ${currentStem}.`); nerdSay(currentStem === 'auto' ? 'Automatic stems restored. I will make sensible notation choices again.' : `Part-writing mode: new stems go ${currentStem}. Fancy!`,'(◕‿◕)');
+};
+function setTempoValue(v){
+  tempo.value=v; tempoFloat.value=v; bpm.textContent=v; bpmFloat.textContent=v;
+}
+tempo.oninput=()=>{setTempoValue(tempo.value); nerdSay(`Tempo set to ${tempo.value} BPM. That is ${tempo.value>140?'turbo mode':tempo.value<65?'serious turtle energy':'a very usable composing speed'}.`,'(◕‿◕)');};
+tempoFloat.oninput=()=>{setTempoValue(tempoFloat.value); nerdSay(`Tempo set to ${tempoFloat.value} BPM. Floating controls are doing their job.`,'(◕‿◕)');};
+instrument.onchange=()=>nerdSay(soundSlogan(instrument.value), instrument.value==='duck'?'(•)>':instrument.value==='frog'?'(@‿@)':instrument.value==='alien'?'[◉‿◉]':'(◕‿◕)');
+volume.oninput=()=>{volRead.textContent=volume.value; nerdSay(`Volume set to ${volume.value}%. Music Nerd will not blast the tiny orchestra.`,'(◕‿◕)');};
+repeatBtn.onclick=()=>{
+  repeatOn=!repeatOn;
+  repeatBtn.classList.toggle('active', repeatOn);
+  repeatBtn.textContent=repeatOn?'↻ Repeating':'↻ Repeat';
+  nerdSay(repeatOn?'Repeat is ON. Press Stop anytime to end the loop immediately.':'Repeat is OFF. Playback will stop at the end.','(◕‿◕)');
+};
+undo.onclick=()=>{if(history.length){redoStack.push(clone());notes=history.pop();render();}};
+redo.onclick=()=>{if(redoStack.length){history.push(clone());notes=redoStack.pop();render();}};
+clear.onclick=()=>{if(notes.length){push();notes=[];render();nerdSay('Fresh blank canvas. The silence is dramatic.','(⊙_⊙)');}};
+notationBtn.onclick=()=>{
+  view='staff'; score.classList.remove('hidden'); roll.classList.add('hidden');
+  notationBtn.classList.add('active'); rollBtn.classList.remove('active');
+  setStatus('Staff view. Eighths beam only as pairs inside a beat. Stem Flip affects new notes.'); nerdSay('Staff view! Real notation goggles engaged.','(◕‿◕)');
+};
+rollBtn.onclick=()=>{
+  view='roll'; roll.classList.remove('hidden'); score.classList.add('hidden');
+  rollBtn.classList.add('active'); notationBtn.classList.remove('active');
+  setStatus('Piano Roll view. Same notes and silly sounds, different visual layout.'); nerdSay('Piano Roll view! Rectangles are just notes wearing tiny sleeping bags.','☆◕‿◕☆');
+};
+
+function clearPlaybackTimers(){
+  playbackTimers.forEach(id=>clearTimeout(id));
+  playbackTimers=[];
+  if(playbackRaf)cancelAnimationFrame(playbackRaf);
+  playbackRaf=null;
+}
+function startPlayback(){
+  stopPlayback();
+  playing=true;
+  nerdSay(repeatOn?'Repeat engaged. Tiny orchestra will loop until Stop.':'Playback engaged. Tiny orchestra, please take your tiny seats.','☆◕‿◕☆');
+
+  const bpmv=+tempo.value;
+  const total=16;
+  const loopMs = total * 60000 / bpmv;
+
+  function scheduleLoop(){
+    if(!playing)return;
+    const loopStart = performance.now();
+    notes.forEach(n=>{
+      if(!n.rest){
+        const delayMs=n.b*60000/bpmv;
+        const sec=Math.min(1.2,n.d*60/bpmv*.82);
+        const tid=setTimeout(()=>{ if(playing) beep(n.p,sec,0,n.v,n.inst||'piano'); }, delayMs);
+        playbackTimers.push(tid);
+      }
+    });
+
+    function f(now){
+      if(!playing)return;
+      let beat=(now-loopStart)/(60000/bpmv);
+      const shownBeat = Math.min(beat,total);
+      const left=view==='roll' ? ((xBeat(shownBeat)-90)/1180*100) : (xBeat(shownBeat)/1180*100);
+      cursor.style.left=left+'%';
+      if(beat<total){
+        playbackRaf=requestAnimationFrame(f);
+      }
+    }
+    playbackRaf=requestAnimationFrame(f);
+
+    const loopTimer=setTimeout(()=>{
+      if(!playing)return;
+      if(repeatOn){
+        clearPlaybackTimers();
+        scheduleLoop();
+      }else{
+        stopPlayback();
+      }
+    }, loopMs+40);
+    playbackTimers.push(loopTimer);
+  }
+
+  scheduleLoop();
+}
+function stopPlayback(){playing=false;clearPlaybackTimers();cursor.style.left=view==='roll'?'11.4%':'222px';}
